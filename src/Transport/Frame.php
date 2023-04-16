@@ -20,51 +20,37 @@ class Frame implements ArrayAccess
 {
     /**
      * Stomp Command
-     *
-     * @var string
      */
-    protected $command;
+    protected string $command;
 
     /**
      * Frame Headers
-     *
-     * @var array
      */
-    protected $headers;
+    protected array $headers;
 
     /**
      * Frame Content
-     *
-     * @var mixed
      */
-    public $body;
+    public mixed $body;
 
     /**
-     * Frame should set an content-length header on transmission
-     *
-     * @var bool
+     * Frame should set a content-length header on transmission
      */
-    private $addLengthHeader = false;
+    private bool $addLengthHeader = false;
 
     /**
-     * Frame is in stomp 1.0 mode
-     *
-     * @var bool
+     * Whether frame is in stomp 1.0 mode
      */
-    private $legacyMode = false;
+    private bool $legacyMode = false;
 
     /**
      * Constructor
-     *
-     * @param string $command
-     * @param array  $headers
-     * @param string $body
      */
-    public function __construct($command = null, array $headers = [], $body = null)
+    public function __construct(string $command, array $headers = [], ?string $body = null)
     {
         $this->command = $command;
         $this->headers = $headers ?: [];
-        $this->body = $body;
+        $this->body    = $body;
     }
 
     /**
@@ -73,9 +59,8 @@ class Frame implements ArrayAccess
      * Will override existing keys.
      *
      * @param array $header
-     * @return Frame
      */
-    public function addHeaders(array $header)
+    public function addHeaders(array $header) : static
     {
         $this->headers += $header;
         return $this;
@@ -83,90 +68,60 @@ class Frame implements ArrayAccess
 
     /**
      * Stomp message Id
-     *
-     * @return string
      */
-    public function getMessageId()
+    public function getMessageId() : string
     {
         return $this['message-id'];
     }
 
-    /**
-     * Is error frame.
-     *
-     * @return boolean
-     */
-    public function isErrorFrame()
+    public function isErrorFrame() : bool
     {
-        return ($this->command == 'ERROR');
+        return ($this->command === 'ERROR');
     }
 
     /**
-     * Tell the frame that we expect an length header.
-     *
-     * @param bool|false $expected
+     * Tell the frame that we expect a length header.
      */
-    public function expectLengthHeader($expected = false)
+    public function expectLengthHeader(bool $expected = false) : void
     {
         $this->addLengthHeader = $expected;
     }
 
     /**
-     * Enable legacy mode for this frame
-     *
-     * @param bool|false $legacy
+     * Enable legacy mode for this frame.
      */
-    public function legacyMode($legacy = false)
+    public function legacyMode(bool $legacy = false) : void
     {
         $this->legacyMode = $legacy;
     }
 
     /**
      * Frame is in legacy mode.
-     *
-     * @return bool
      */
-    public function isLegacyMode()
+    public function isLegacyMode() : bool
     {
         return $this->legacyMode;
     }
 
-    /**
-     * Command
-     *
-     * @return string
-     */
-    public function getCommand()
+    public function getCommand() : string
     {
         return $this->command;
     }
 
-    /**
-     * Body
-     *
-     * @return string
-     */
-    public function getBody()
+    public function getBody() : ?string
     {
         return $this->body;
     }
 
-    /**
-     * Headers
-     *
-     * @return array
-     */
-    public function getHeaders()
+    public function getHeaders() : array
     {
         return $this->headers;
     }
 
     /**
      * Convert frame to transportable string
-     *
-     * @return string
      */
-    public function __toString()
+    public function __toString() : string
     {
         $data = $this->command . "\n";
 
@@ -187,21 +142,16 @@ class Frame implements ArrayAccess
 
     /**
      * Size of Frame body.
-     *
-     * @return int
      */
-    protected function getBodySize()
+    protected function getBodySize() : int
     {
         return strlen($this->body);
     }
 
     /**
      * Encodes header values.
-     *
-     * @param string $value
-     * @return string
      */
-    protected function encodeHeaderValue($value)
+    protected function encodeHeaderValue(string $value) : string
     {
         if ($this->legacyMode) {
             return str_replace(["\n"], ['\n'], $value);
@@ -209,40 +159,28 @@ class Frame implements ArrayAccess
         return str_replace(["\\", "\r", "\n", ':'], ["\\\\", '\r', '\n', '\c'], $value);
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function offsetExists($offset)
+    public function offsetExists(mixed $offset) : bool
     {
         return isset($this->headers[$offset]);
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function offsetGet($offset)
+    public function offsetGet($offset) : mixed
     {
         if (isset($this->headers[$offset])) {
             return $this->headers[$offset];
         }
+
         return null;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function offsetSet($offset, $value)
+    public function offsetSet(mixed $offset, mixed $value) : void
     {
         if ($value !== null) {
             $this->headers[$offset] = $value;
         }
     }
 
-
-    /**
-     * @inheritdoc
-     */
-    public function offsetUnset($offset)
+    public function offsetUnset($offset) : void
     {
         unset($this->headers[$offset]);
     }

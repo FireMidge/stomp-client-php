@@ -26,32 +26,30 @@ class SubscriptionList implements IteratorAggregate, ArrayAccess, Countable
     /**
      * @var Subscription[]
      */
-    private $subscriptions = [];
+    private array $subscriptions = [];
 
     /**
      * Returns the last added active Subscription.
      *
      * @return Subscription
      */
-    public function getLast()
+    public function getLast() : Subscription
     {
         return end($this->subscriptions);
     }
 
     /**
-     * Returns the subscription the frame belongs to or false if no matching subscription was found.
-     *
-     * @param Frame $frame
-     * @return Subscription|false
+     * Returns the subscription the frame belongs to or null if no matching subscription was found.
      */
-    public function getSubscription(Frame $frame)
+    public function getSubscription(Frame $frame) : ?Subscription
     {
         foreach ($this->subscriptions as $subscription) {
             if ($subscription->belongsTo($frame)) {
                 return $subscription;
             }
         }
-        return false;
+
+        return null;
     }
 
     /**
@@ -59,17 +57,12 @@ class SubscriptionList implements IteratorAggregate, ArrayAccess, Countable
      *
      * @return \Iterator|Subscription[]
      */
-    public function getIterator()
+    public function getIterator() : ArrayIterator
     {
         return new ArrayIterator($this->subscriptions);
     }
 
-    /**
-     * @inheritdoc
-     *
-     * @return bool
-     */
-    public function offsetExists($offset)
+    public function offsetExists(mixed $offset) : bool
     {
         return isset($this->subscriptions[$offset]);
     }
@@ -79,15 +72,17 @@ class SubscriptionList implements IteratorAggregate, ArrayAccess, Countable
      *
      * @return Subscription
      */
-    public function offsetGet($offset)
+    public function offsetGet(mixed $offset) : mixed
     {
         return $this->subscriptions[$offset];
     }
 
     /**
      * @inheritdoc
+     *
+     * @param Subscription $value
      */
-    public function offsetSet($offset, $value)
+    public function offsetSet(mixed $offset, mixed $value) : void
     {
         $this->subscriptions[$offset] = $value;
     }
@@ -95,7 +90,7 @@ class SubscriptionList implements IteratorAggregate, ArrayAccess, Countable
     /**
      * @inheritdoc
      */
-    public function offsetUnset($offset)
+    public function offsetUnset(mixed $offset) : void
     {
         unset($this->subscriptions[$offset]);
     }
@@ -103,7 +98,7 @@ class SubscriptionList implements IteratorAggregate, ArrayAccess, Countable
     /**
      * @inheritdoc
      */
-    public function count()
+    public function count() : int
     {
         return count($this->subscriptions);
     }
