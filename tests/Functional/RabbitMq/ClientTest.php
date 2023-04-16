@@ -156,7 +156,7 @@ class ClientTest extends TestCase
 
         $this->simpleStomp->subscribe('/queue/abort');
         $frame = $this->stomp->readFrame();
-        $this->assertFalse($frame);
+        $this->assertNull($frame);
         $this->simpleStomp->unsubscribe('/queue/abort');
     }
 

@@ -20,16 +20,8 @@ use Stomp\Transport\Frame;
  */
 class ErrorFrameException extends StompException
 {
-    /**
-     *
-     * @var Frame
-     */
-    private $frame;
+    private Frame $frame;
 
-    /**
-     *
-     * @param Frame $frame
-     */
     public function __construct(Frame $frame)
     {
         $this->frame = $frame;
@@ -37,12 +29,8 @@ class ErrorFrameException extends StompException
             sprintf('Error "%s"', $frame['message'])
         );
     }
-
-    /**
-     *
-     * @return Frame
-     */
-    public function getFrame()
+    
+    public function getFrame() : Frame
     {
         return $this->frame;
     }

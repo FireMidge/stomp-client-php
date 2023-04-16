@@ -18,11 +18,8 @@ class Message extends Frame
 {
     /**
      * Message constructor.
-     *
-     * @param string $body
-     * @param array $headers
      */
-    public function __construct($body, array $headers = [])
+    public function __construct(?string $body, array $headers = [])
     {
         parent::__construct('SEND', $headers, $body);
     }

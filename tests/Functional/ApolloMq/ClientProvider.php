@@ -20,10 +20,8 @@ class ClientProvider
 {
     /**
      * ApolloMq Test Client
-     *
-     * @return Client
      */
-    public static function getClient()
+    public static function getClient() : Client
     {
         $client = new Client(new Connection('tcp://127.0.0.1:61020'));
         $client->setLogin('admin', 'password');

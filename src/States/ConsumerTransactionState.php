@@ -24,7 +24,7 @@ class ConsumerTransactionState extends ConsumerState
     /**
      * @inheritdoc
      */
-    protected function init(array $options = [])
+    protected function init(array $options = []) : int|string|null
     {
         $this->initTransaction($options);
         return parent::init($options);
@@ -33,7 +33,7 @@ class ConsumerTransactionState extends ConsumerState
     /**
      * @inheritdoc
      */
-    public function commit()
+    public function commit() : void
     {
         $this->getClient()->sendFrame(
             $this->getProtocol()->getCommitFrame($this->transactionId)
@@ -44,7 +44,7 @@ class ConsumerTransactionState extends ConsumerState
     /**
      * @inheritdoc
      */
-    public function abort()
+    public function abort() : void
     {
         $this->transactionAbort();
         $this->setState(new ConsumerState($this->getClient(), $this->getBase()), parent::getOptions());
@@ -53,7 +53,7 @@ class ConsumerTransactionState extends ConsumerState
     /**
      * @inheritdoc
      */
-    public function ack(Frame $frame)
+    public function ack(Frame $frame) : void
     {
         $this->getClient()->sendFrame($this->getProtocol()->getAckFrame($frame, $this->transactionId), false);
     }
@@ -61,7 +61,7 @@ class ConsumerTransactionState extends ConsumerState
     /**
      * @inheritdoc
      */
-    public function nack(Frame $frame, $requeue = null)
+    public function nack(Frame $frame, ?bool $requeue = null) : void
     {
         $this->getClient()->sendFrame(
             $this->getProtocol()->getNackFrame($frame, $this->transactionId, $requeue),
@@ -72,7 +72,7 @@ class ConsumerTransactionState extends ConsumerState
     /**
      * @inheritdoc
      */
-    public function unsubscribe($subscriptionId = null)
+    public function unsubscribe(int|string|null $subscriptionId = null) : void
     {
         if ($this->endSubscription($subscriptionId)) {
             if ($this->getClient()->isBufferEmpty()) {
@@ -92,7 +92,7 @@ class ConsumerTransactionState extends ConsumerState
     /**
      * @inheritdoc
      */
-    public function begin()
+    public function begin() : void
     {
         throw new InvalidStateException($this, __FUNCTION__);
     }

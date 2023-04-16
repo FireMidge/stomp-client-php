@@ -50,7 +50,7 @@ class ConsumerState extends StateTemplate
     /**
      * @inheritdoc
      */
-    protected function init(array $options = [])
+    protected function init(array $options = []) : string|int|null
     {
         $this->subscriptions = new SubscriptionList();
         if (isset($options['subscriptions'])) {
@@ -64,7 +64,7 @@ class ConsumerState extends StateTemplate
     /**
      * @inheritdoc
      */
-    public function ack(Frame $frame)
+    public function ack(Frame $frame) : void
     {
         $this->getClient()->sendFrame($this->getProtocol()->getAckFrame($frame), false);
     }
@@ -72,7 +72,7 @@ class ConsumerState extends StateTemplate
     /**
      * @inheritdoc
      */
-    public function nack(Frame $frame, $requeue = null)
+    public function nack(Frame $frame, ?bool $requeue = null) : void
     {
         $this->getClient()->sendFrame($this->getProtocol()->getNackFrame($frame, null, $requeue), false);
     }
@@ -80,7 +80,7 @@ class ConsumerState extends StateTemplate
     /**
      * @inheritdoc
      */
-    public function send($destination, Message $message)
+    public function send(string $destination, Message $message) : bool
     {
         return $this->getClient()->send($destination, $message);
     }
@@ -88,7 +88,7 @@ class ConsumerState extends StateTemplate
     /**
      * @inheritdoc
      */
-    public function begin()
+    public function begin() : void
     {
         $this->setState(new ConsumerTransactionState($this->getClient(), $this->getBase()), $this->getOptions());
     }
@@ -96,7 +96,7 @@ class ConsumerState extends StateTemplate
     /**
      * @inheritdoc
      */
-    public function subscribe($destination, $selector, $ack, array $header = [])
+    public function subscribe(string $destination, ?string $selector, string $ack, array $header = []) : string|int|null
     {
         $subscription = new Subscription($destination, $selector, $ack, IdGenerator::generateId(), $header);
         $this->getClient()->sendFrame(
@@ -115,7 +115,7 @@ class ConsumerState extends StateTemplate
     /**
      * @inheritdoc
      */
-    public function unsubscribe($subscriptionId = null)
+    public function unsubscribe(int|string|null $subscriptionId = null) : void
     {
         if ($this->endSubscription($subscriptionId)) {
             if ($this->getClient()->isBufferEmpty()) {
@@ -162,27 +162,17 @@ class ConsumerState extends StateTemplate
         return false;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function read()
+    public function read() : ?Frame
     {
         return $this->getClient()->readFrame();
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function getSubscriptions()
+    public function getSubscriptions() : SubscriptionList
     {
         return $this->subscriptions;
     }
 
-
-    /**
-     * @inheritdoc
-     */
-    protected function getOptions()
+    protected function getOptions() : array
     {
         return [
             'subscriptions' => $this->subscriptions

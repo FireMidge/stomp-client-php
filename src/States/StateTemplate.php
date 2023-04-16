@@ -59,31 +59,21 @@ abstract class StateTemplate extends StateSetter implements IStateful
 
     /**
      * Activates the current state, after it has been applied on base.
-     *
-     * @param array $options
-     * @return mixed
+     * Returns the subscription ID.
      */
-    abstract protected function init(array $options = []);
+    abstract protected function init(array $options = []) : string|int|null;
 
     /**
      * Returns the options needed in current state.
-     *
-     * @return array
      */
-    abstract protected function getOptions();
+    abstract protected function getOptions() : array;
 
-    /**
-     * @return Client
-     */
-    protected function getClient()
+    protected function getClient() : Client
     {
         return $this->client;
     }
 
-    /**
-     * @return Protocol
-     */
-    protected function getProtocol()
+    protected function getProtocol() : Protocol
     {
         return $this->client->getProtocol();
     }
@@ -91,12 +81,13 @@ abstract class StateTemplate extends StateSetter implements IStateful
     /**
      * @inheritdoc
      */
-    protected function setState(IStateful $state, array $options = [])
+    protected function setState(IStateful $state, array $options = []) : string|int|null
     {
         $init = null;
         if ($state instanceof StateTemplate) {
             $init = $state->init($options);
         }
+
         $this->base->setState($state);
         return $init;
     }
@@ -104,7 +95,7 @@ abstract class StateTemplate extends StateSetter implements IStateful
     /**
      * @inheritdoc
      */
-    public function ack(Frame $frame)
+    public function ack(Frame $frame) : void
     {
         throw new InvalidStateException($this, __FUNCTION__);
     }
@@ -112,7 +103,7 @@ abstract class StateTemplate extends StateSetter implements IStateful
     /**
      * @inheritdoc
      */
-    public function nack(Frame $frame, $requeue = null)
+    public function nack(Frame $frame, ?bool $requeue = null) : void
     {
         throw new InvalidStateException($this, __FUNCTION__);
     }
@@ -120,7 +111,7 @@ abstract class StateTemplate extends StateSetter implements IStateful
     /**
      * @inheritdoc
      */
-    public function send($destination, Message $message)
+    public function send(string $destination, Message $message) : bool
     {
         return $this->getClient()->send($destination, $message);
     }
@@ -128,7 +119,7 @@ abstract class StateTemplate extends StateSetter implements IStateful
     /**
      * @inheritdoc
      */
-    public function begin()
+    public function begin() : void
     {
         throw new InvalidStateException($this, __FUNCTION__);
     }
@@ -136,7 +127,7 @@ abstract class StateTemplate extends StateSetter implements IStateful
     /**
      * @inheritdoc
      */
-    public function commit()
+    public function commit() : void
     {
         throw new InvalidStateException($this, __FUNCTION__);
     }
@@ -144,7 +135,7 @@ abstract class StateTemplate extends StateSetter implements IStateful
     /**
      * @inheritdoc
      */
-    public function abort()
+    public function abort() : void
     {
         throw new InvalidStateException($this, __FUNCTION__);
     }
@@ -152,7 +143,7 @@ abstract class StateTemplate extends StateSetter implements IStateful
     /**
      * @inheritdoc
      */
-    public function subscribe($destination, $selector, $ack, array $header = [])
+    public function subscribe(string $destination, ?string $selector, string $ack, array $header = []) : string|int|null
     {
         throw new InvalidStateException($this, __FUNCTION__);
     }
@@ -160,7 +151,7 @@ abstract class StateTemplate extends StateSetter implements IStateful
     /**
      * @inheritdoc
      */
-    public function unsubscribe($subscriptionId = null)
+    public function unsubscribe(string|int|null $subscriptionId = null) : void
     {
         throw new InvalidStateException($this, __FUNCTION__);
     }
@@ -168,7 +159,7 @@ abstract class StateTemplate extends StateSetter implements IStateful
     /**
      * @inheritdoc
      */
-    public function read()
+    public function read() : ?Frame
     {
         throw new InvalidStateException($this, __FUNCTION__);
     }
@@ -176,7 +167,7 @@ abstract class StateTemplate extends StateSetter implements IStateful
     /**
      * @inheritdoc
      */
-    public function getSubscriptions()
+    public function getSubscriptions() : SubscriptionList
     {
         return new SubscriptionList();
     }

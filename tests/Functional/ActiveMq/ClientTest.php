@@ -174,7 +174,7 @@ class ClientTest extends TestCase
 
         $this->simpleStomp->subscribe($this->queue, 'mysubid');
         $frame = $this->Stomp->readFrame();
-        $this->assertFalse($frame);
+        $this->assertNull($frame);
         $this->simpleStomp->unsubscribe($this->queue, 'mysubid');
         $this->Stomp->disconnect();
     }

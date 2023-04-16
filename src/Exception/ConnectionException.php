@@ -18,19 +18,9 @@ namespace Stomp\Exception;
  */
 class ConnectionException extends StompException
 {
-    /**
-     *
-     * @var array
-     */
-    private $connectionInfo;
+    private array $connectionInfo = [];
 
-    /**
-     *
-     * @param string $info
-     * @param array $connection
-     * @param ConnectionException $previous
-     */
-    public function __construct($info, array $connection = [], ConnectionException $previous = null)
+    public function __construct(string $info, array $connection = [], ?ConnectionException $previous = null)
     {
         $this->connectionInfo = $connection;
 
@@ -39,22 +29,21 @@ class ConnectionException extends StompException
         if ($host) {
             $info = sprintf('%s (Host: %s)', $info, $host);
         }
+
         parent::__construct($info, 0, $previous);
     }
 
 
     /**
      * Active used connection.
-     *
-     * @return array
      */
-    public function getConnectionInfo()
+    public function getConnectionInfo() : array
     {
         return $this->connectionInfo;
     }
 
 
-    protected function getHostname()
+    protected function getHostname() : ?string
     {
         return isset($this->connectionInfo['host']) ? $this->connectionInfo['host'] : null;
     }

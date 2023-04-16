@@ -16,18 +16,16 @@ namespace Stomp\States;
  */
 class ProducerState extends StateTemplate
 {
-    /**
-     * @inheritdoc
-     */
-    protected function init(array $options = [])
+    protected function init(array $options = []) : int|string|null
     {
         // nothing to do here
+        return null;
     }
 
     /**
      * @inheritdoc
      */
-    public function begin()
+    public function begin() : void
     {
         $this->setState(new ProducerTransactionState($this->getClient(), $this->getBase()));
     }
@@ -35,7 +33,7 @@ class ProducerState extends StateTemplate
     /**
      * @inheritdoc
      */
-    public function subscribe($destination, $selector, $ack, array $header = [])
+    public function subscribe(string $destination, ?string $selector, string $ack, array $header = []) : string|int|null
     {
         return $this->setState(
             new ConsumerState($this->getClient(), $this->getBase()),
@@ -46,7 +44,7 @@ class ProducerState extends StateTemplate
     /**
      * @inheritdoc
      */
-    protected function getOptions()
+    protected function getOptions() : array
     {
         return [];
     }

@@ -18,16 +18,9 @@ namespace Stomp\Exception;
  */
 class MissingReceiptException extends StompException
 {
-    /**
-     * @var string
-     */
-    private $receiptId;
+    private string $receiptId;
 
-    /**
-     *
-     * @param string $receiptId
-     */
-    public function __construct($receiptId)
+    public function __construct(string $receiptId)
     {
         $this->receiptId = $receiptId;
         parent::__construct(
@@ -41,10 +34,8 @@ class MissingReceiptException extends StompException
 
     /**
      * Expected receipt id.
-     *
-     * @return String
      */
-    public function getReceiptId()
+    public function getReceiptId() : string
     {
         return $this->receiptId;
     }

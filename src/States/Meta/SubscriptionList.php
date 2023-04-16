@@ -13,6 +13,7 @@ use ArrayIterator;
 use Countable;
 use IteratorAggregate;
 use Stomp\Transport\Frame;
+use Traversable;
 
 /**
  * SubscriptionList meta info for active subscriptions.
@@ -57,7 +58,7 @@ class SubscriptionList implements IteratorAggregate, ArrayAccess, Countable
      *
      * @return \Iterator|Subscription[]
      */
-    public function getIterator() : ArrayIterator
+    public function getIterator() : Traversable
     {
         return new ArrayIterator($this->subscriptions);
     }

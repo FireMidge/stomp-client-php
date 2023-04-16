@@ -24,10 +24,8 @@ abstract class ActiveMqFunctionalTestCase extends TestCase
 
     /**
      * ActiveMq Stomp Test Client
-     *
-     * @return Client
      */
-    protected function getClient()
+    protected function getClient() : Client
     {
         return ClientProvider::getClient();
     }

@@ -18,9 +18,6 @@ abstract class StateSetter
 {
     /**
      * Change current state to given one, might return creation data from state.
-     *
-     * @param IStateful $state
-     * @return mixed
      */
-    abstract protected function setState(IStateful $state);
+    abstract protected function setState(IStateful $state) : int|string|null;
 }

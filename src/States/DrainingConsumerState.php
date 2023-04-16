@@ -12,20 +12,16 @@ class DrainingConsumerState extends StateTemplate
 
     /**
      * Activates the current state, after it has been applied on base.
-     *
-     * @param array $options
-     * @return mixed
      */
-    protected function init(array $options = [])
+    protected function init(array $options = []) : int|string|null
     {
+        return null;
     }
 
     /**
      * Returns the options needed in current state.
-     *
-     * @return array
      */
-    protected function getOptions()
+    protected function getOptions() : array
     {
         return [];
     }
@@ -33,7 +29,7 @@ class DrainingConsumerState extends StateTemplate
     /**
      * @inheritdoc
      */
-    public function ack(Frame $frame)
+    public function ack(Frame $frame) : void
     {
         $this->getClient()->sendFrame($this->getProtocol()->getAckFrame($frame), false);
     }
@@ -41,7 +37,7 @@ class DrainingConsumerState extends StateTemplate
     /**
      * @inheritdoc
      */
-    public function nack(Frame $frame, $requeue = null)
+    public function nack(Frame $frame, bool $requeue = null) : void
     {
         $this->getClient()->sendFrame($this->getProtocol()->getNackFrame($frame, null, $requeue), false);
     }
@@ -49,7 +45,7 @@ class DrainingConsumerState extends StateTemplate
     /**
      * @inheritdoc
      */
-    public function send($destination, Message $message)
+    public function send(string $destination, Message $message) : bool
     {
         return $this->getClient()->send($destination, $message);
     }
@@ -57,7 +53,7 @@ class DrainingConsumerState extends StateTemplate
     /**
      * @inheritdoc
      */
-    public function read()
+    public function read() : ?Frame
     {
         if ($frame = $this->getClient()->readFrame()) {
             return $frame;
@@ -65,13 +61,14 @@ class DrainingConsumerState extends StateTemplate
         $this->setState(
             new ProducerState($this->getClient(), $this->getBase())
         );
-        return false;
+
+        return null;
     }
 
     /**
      * @inheritdoc
      */
-    public function begin()
+    public function begin() : void
     {
         throw new DrainingMessageException($this->getClient(), $this, __FUNCTION__);
     }
@@ -79,7 +76,7 @@ class DrainingConsumerState extends StateTemplate
     /**
      * @inheritdoc
      */
-    public function subscribe($destination, $selector, $ack, array $header = [])
+    public function subscribe(string $destination, ?string $selector, string $ack, array $header = []) : int|string|null
     {
         throw new DrainingMessageException($this->getClient(), $this, __FUNCTION__);
     }

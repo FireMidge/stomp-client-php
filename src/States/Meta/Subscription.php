@@ -18,97 +18,63 @@ use Stomp\Transport\Frame;
  */
 class Subscription
 {
-    /**
-     * @var int
-     */
-    private $subscriptionId;
+    private int|string $subscriptionId;
+
+    private string $selector;
+
+    private string $destination;
+
+    private string $ack;
+
+    private array $header;
 
     /**
-     * @var String
-     */
-    private $selector;
-
-    /**
-     * @var String
-     */
-    private $destination;
-
-    /**
-     * @var String
-     */
-    private $ack;
-
-    /**
-     * @var array
-     */
-    private $header;
-
-    /**
-     * Subscription constructor.
-     * @param String $destination
-     * @param String $selector
-     * @param String $ack
-     * @param int $subscriptionId
      * @param array $header additionally passed to create this subscription
      */
-    public function __construct($destination, $selector, $ack, $subscriptionId, array $header = [])
-    {
+    public function __construct(
+        string $destination,
+        string $selector,
+        string $ack,
+        int|string $subscriptionId,
+        array $header = []
+    ) {
         $this->subscriptionId = $subscriptionId;
-        $this->selector = $selector;
-        $this->destination = $destination;
-        $this->ack = $ack;
-        $this->header = $header;
+        $this->selector       = $selector;
+        $this->destination    = $destination;
+        $this->ack            = $ack;
+        $this->header         = $header;
     }
 
-
-    /**
-     * @return int
-     */
-    public function getSubscriptionId()
+    public function getSubscriptionId() : int|string
     {
         return $this->subscriptionId;
     }
 
-    /**
-     * @return String
-     */
-    public function getSelector()
+    public function getSelector() : string
     {
         return $this->selector;
     }
 
-    /**
-     * @return String
-     */
-    public function getDestination()
+    public function getDestination() : string
     {
         return $this->destination;
     }
 
-    /**
-     * @return String
-     */
-    public function getAck()
+    public function getAck() : string
     {
         return $this->ack;
     }
 
-    /**
-     * @return array
-     */
-    public function getHeader()
+    public function getHeader() : array
     {
         return $this->header;
     }
 
     /**
      * Checks if the given frame belongs to current Subscription.
-     *
-     * @param Frame $frame
-     * @return bool
      */
-    public function belongsTo(Frame $frame)
+    public function belongsTo(Frame $frame) : bool
     {
-        return ($frame['subscription'] == $this->subscriptionId);
+        return ($frame['subscription'] === $this->subscriptionId);
     }
 }

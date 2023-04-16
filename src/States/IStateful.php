@@ -21,84 +21,55 @@ interface IStateful
 {
     /**
      * Acknowledge consumption of a message from a subscription
-     *
-     * @param Frame $frame
-     * @return void
      */
-    public function ack(Frame $frame);
+    public function ack(Frame $frame) : void;
 
     /**
      * Not acknowledge consumption of a message from a subscription
      *
-     * @param Frame $frame
      * @param bool $requeue Requeue header not supported on all brokers
-     * @return void
      */
-    public function nack(Frame $frame, $requeue = null);
+    public function nack(Frame $frame, ?bool $requeue = null) : void;
 
     /**
      * Send a message.
-     *
-     * @param string $destination
-     * @param \Stomp\Transport\Message $message
-     * @return bool
      */
-    public function send($destination, Message $message);
+    public function send(string $destination, Message $message) : bool;
 
     /**
-     * Begins an transaction.
-     *
-     * @return void
+     * Begins a transaction.
      */
-    public function begin();
+    public function begin() : void;
 
     /**
      * Commit current transaction.
-     *
-     * @return void
      */
-    public function commit();
+    public function commit() : void;
 
     /**
      * Abort current transaction.
-     *
-     * @return void
      */
-    public function abort();
+    public function abort() : void;
 
     /**
      * Subscribe to given destination.
      *
-     * Returns the subscriptionId used for this.
-     *
-     * @param string $destination
-     * @param string $selector
-     * @param string $ack
-     * @param array  $header
-     * @return int
+     * Returns the subscriptionId used for this, which can be null.
      */
-    public function subscribe($destination, $selector, $ack, array $header = []);
+    public function subscribe(string $destination, ?string $selector, string $ack, array $header = []) : int|string|null;
 
     /**
      * Unsubscribe from current or given destination.
-     *
-     * @param int $subscriptionId
-     * @return void
      */
-    public function unsubscribe($subscriptionId = null);
-
+    public function unsubscribe(int|string|null $subscriptionId = null) : void;
 
     /**
      * Read a frame
-     *
-     * @return \Stomp\Transport\Frame|false
      */
-    public function read();
+    public function read() : ?Frame;
 
     /**
      * Returns as list of all active subscriptions.
-     *
-     * @return SubscriptionList
      */
-    public function getSubscriptions();
+    public function getSubscriptions() : SubscriptionList;
 }

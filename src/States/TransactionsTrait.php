@@ -21,29 +21,17 @@ use Stomp\Util\IdGenerator;
  */
 trait TransactionsTrait
 {
+    abstract public function getProtocol() : Protocol;
 
-    /**
-     * @return Protocol
-     */
-    abstract public function getProtocol();
-
-
-    /**
-     * @return Client
-     */
-    abstract public function getClient();
+    abstract public function getClient() : Client;
 
     /**
      * Id used for current transaction.
-     *
-     * @var int|string
      */
-    protected $transactionId;
+    protected int|string $transactionId;
 
     /**
      * Init the transaction state.
-     *
-     * @param array $options
      */
     protected function initTransaction(array $options = [])
     {
@@ -59,22 +47,16 @@ trait TransactionsTrait
 
     /**
      * Options for this transaction state.
-     *
-     * @return array
      */
-    protected function getOptions()
+    protected function getOptions() : array
     {
         return ['transactionId' => $this->transactionId];
     }
 
     /**
      * Send a message within this transaction.
-     *
-     * @param string $destination
-     * @param \Stomp\Transport\Message $message
-     * @return bool
      */
-    public function send($destination, Message $message)
+    public function send(string $destination, Message $message) : bool
     {
         return $this->getClient()->send($destination, $message, ['transaction' => $this->transactionId], false);
     }
@@ -82,7 +64,7 @@ trait TransactionsTrait
     /**
      * Commit current transaction.
      */
-    protected function transactionCommit()
+    protected function transactionCommit() : void
     {
         $this->getClient()->sendFrame($this->getProtocol()->getCommitFrame($this->transactionId));
         IdGenerator::releaseId($this->transactionId);
@@ -91,7 +73,7 @@ trait TransactionsTrait
     /**
      * Abort the current transaction.
      */
-    protected function transactionAbort()
+    protected function transactionAbort() : void
     {
         $this->getClient()->sendFrame($this->getProtocol()->getAbortFrame($this->transactionId));
         IdGenerator::releaseId($this->transactionId);

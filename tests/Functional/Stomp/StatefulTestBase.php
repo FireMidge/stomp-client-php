@@ -41,7 +41,7 @@ abstract class StatefulTestBase extends TestCase
     /**
      * @return Client
      */
-    abstract protected function getClient();
+    abstract protected function getClient() : Client;
 
     /**
      * @return StatefulStomp

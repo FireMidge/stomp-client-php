@@ -20,28 +20,15 @@ use Stomp\Transport\Frame;
  */
 class UnexpectedResponseException extends StompException
 {
-    /**
-     *
-     * @var Frame
-     */
-    private $frame;
+    private Frame $frame;
 
-    /**
-     *
-     * @param Frame $frame
-     * @param string $expectedInfo
-     */
-    public function __construct(Frame $frame, $expectedInfo)
+    public function __construct(Frame $frame, string $expectedInfo)
     {
         $this->frame = $frame;
         parent::__construct(sprintf('Unexpected response received. %s', $expectedInfo));
     }
 
-    /**
-     *
-     * @return Frame
-     */
-    public function getFrame()
+    public function getFrame() : Frame
     {
         return $this->frame;
     }

@@ -166,7 +166,7 @@ class ClientTest extends TestCase
 
         $this->simpleStomp->subscribe($this->queue . '/abort', 'mysubid');
         $frame = $this->Stomp->readFrame();
-        $this->assertFalse($frame);
+        $this->assertNull($frame);
         $this->simpleStomp->unsubscribe($this->queue . '/abort', 'mysubid');
         $this->Stomp->disconnect();
     }
@@ -373,9 +373,9 @@ class ClientTest extends TestCase
 
         $frame = $consumer2->readFrame();
         $this->assertEquals($frame->body, 'test message');
-        if ($frame != null) {
-            $consumer2->sendFrame($amq->getAckFrame($frame));
-        }
+
+        $consumer2->sendFrame($amq->getAckFrame($frame));
+
 
         // yes, that's active mq! you must unsub two times...
         // http://mail-archives.apache.org/mod_mbox/activemq-dev/201205.mbox/raw/

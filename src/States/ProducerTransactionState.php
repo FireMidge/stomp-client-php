@@ -20,54 +20,39 @@ class ProducerTransactionState extends ProducerState
 {
     use TransactionsTrait;
 
-    /**
-     * @inheritdoc
-     */
-    protected function init(array $options = [])
+    protected function init(array $options = []) : int|string|null
     {
         $this->initTransaction($options);
-        parent::init($options);
+        return parent::init($options);
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function commit()
+    public function commit() : void
     {
         $this->transactionCommit();
         $this->setState(new ProducerState($this->getClient(), $this->getBase()), parent::getOptions());
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function abort()
+    public function abort() : void
     {
         $this->transactionAbort();
         $this->setState(new ProducerState($this->getClient(), $this->getBase()), parent::getOptions());
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function subscribe($destination, $selector, $ack, array $header = [])
+    public function subscribe(string $destination, ?string $selector, string $ack, array $header = []) : int|string|null
     {
         return $this->setState(
             new ConsumerTransactionState($this->getClient(), $this->getBase()),
             $this->getOptions() +
             [
                 'destination' => $destination,
-                'selector' => $selector,
-                'ack' => $ack,
-                'header' => $header
+                'selector'    => $selector,
+                'ack'         => $ack,
+                'header'      => $header,
             ]
         );
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function begin()
+    public function begin() : void
     {
         throw new InvalidStateException($this, __FUNCTION__);
     }

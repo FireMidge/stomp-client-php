@@ -99,6 +99,6 @@ class SyncTest extends TestCase
         $this->Stomp->getConnection()->setReadTimeout(0, 500000);
 
         $frame = $this->Stomp->readFrame();
-        $this->assertFalse($frame);
+        $this->assertNull($frame);
     }
 }

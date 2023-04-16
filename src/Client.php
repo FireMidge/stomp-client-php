@@ -34,86 +34,50 @@ class Client
 {
     /**
      * Perform request synchronously
-     *
-     * @var boolean
      */
-    private $sync = true;
+    private bool $sync = true;
 
 
     /**
      * Client id used for durable subscriptions
-     *
-     * @var string
      */
-    private $clientId;
+    private string $clientId;
 
     /**
      * Connection session id
-     *
-     * @var string|null
      */
-    private $sessionId;
+    private ?string $sessionId = null;
 
     /**
      * Frames that have been read but not processed yet.
      *
      * @var Frame[]
      */
-    private $unprocessedFrames = [];
+    private array $unprocessedFrames = [];
 
-    /**
-     * @var Connection|null
-     */
-    private $connection;
+    private ?Connection $connection = null;
 
-    /**
-     *
-     * @var Protocol|null
-     */
-    private $protocol;
+    private ?Protocol $protocol = null;
 
     /**
      * Seconds to wait for a receipt.
-     *
-     * @var float
      */
-    private $receiptWait = 2;
+    private float $receiptWait = 2;
+
+    private string $login;
+
+    private string $passcode;
+
+    private array $versions = [Version::VERSION_1_0, Version::VERSION_1_1, Version::VERSION_1_2];
+
+    private ?string $host = null;
 
     /**
-     *
-     * @var string
-     */
-    private $login;
-
-    /**
-     *
-     * @var string
-     */
-    private $passcode;
-
-
-    /**
-     *
-     * @var array
-     */
-    private $versions = [Version::VERSION_1_0, Version::VERSION_1_1, Version::VERSION_1_2];
-
-    /**
-     *
-     * @var string
-     */
-    private $host;
-
-    /**
-     *
      * @var int[]
      */
-    private $heartbeat = [0, 0];
+    private array $heartbeat = [0, 0];
 
-    /**
-     * @var bool
-     */
-    private $isConnecting = false;
+    private bool $isConnecting = false;
 
     /**
      * Constructor
@@ -121,7 +85,7 @@ class Client
      * @param string|Connection $broker Broker URL or a connection
      * @see Connection::__construct()
      */
-    public function __construct($broker)
+    public function __construct(string|Connection $broker)
     {
         $this->connection = $broker instanceof Connection ? $broker : new Connection($broker);
     }
@@ -131,18 +95,15 @@ class Client
      *
      * @param array $versions defaults to all client supported versions
      */
-    public function setVersions(array $versions)
+    public function setVersions(array $versions) : void
     {
         $this->versions = $versions;
     }
 
     /**
      * Configure the login to use.
-     *
-     * @param string $login
-     * @param string $passcode
      */
-    public function setLogin($login, $passcode)
+    public function setLogin(string $login, string $passcode) : void
     {
         $this->login = $login;
         $this->passcode = $passcode;
@@ -152,10 +113,8 @@ class Client
      * Sets an fixed vhostname, which will be passed on connect as header['host'].
      *
      * (null = Default value is the hostname determined by connection.)
-     *
-     * @param string $host
      */
-    public function setVhostname($host = null)
+    public function setVhostname(?string $host = null) : void
     {
         $this->host = $host;
     }
@@ -187,7 +146,7 @@ class Client
      * @see \Stomp\Network\Observer\HeartbeatEmitter
      * @see \Stomp\Network\Connection::sendAlive()
      */
-    public function setHeartbeat($send = 0, $receive = 0)
+    public function setHeartbeat(int $send = 0, int $receive = 0) : void
     {
         $this->heartbeat = [$send, $receive];
     }
@@ -195,11 +154,10 @@ class Client
     /**
      * Connect to server
      *
-     * @return boolean
      * @throws StompException
      * @see setVhostname
      */
-    public function connect()
+    public function connect() : bool
     {
         if ($this->isConnected()) {
             return true;
@@ -237,12 +195,10 @@ class Client
 
     /**
      * Returns the next available frame from the connection, respecting the connect timeout.
-     *
-     * @return null|Frame
      * @throws ConnectionException
      * @throws Exception\ErrorFrameException
      */
-    private function getConnectedFrame()
+    private function getConnectedFrame() : ?Frame
     {
         $deadline = microtime(true) + $this->getConnection()->getConnectTimeout();
         do {
@@ -261,9 +217,8 @@ class Client
      * @param string|Frame $msg Message
      * @param array $header
      * @param boolean $sync Perform request synchronously
-     * @return boolean
      */
-    public function send($destination, $msg, array $header = [], $sync = null)
+    public function send(string $destination, string|Frame $msg, array $header = [], ?bool $sync = null) : bool
     {
         if (!$msg instanceof Frame) {
             return $this->send($destination, new Frame('SEND', $header, $msg), [], $sync);
@@ -271,17 +226,14 @@ class Client
 
         $msg->addHeaders($header);
         $msg['destination'] = $destination;
+
         return $this->sendFrame($msg, $sync);
     }
 
     /**
      * Send a frame.
-     *
-     * @param Frame $frame
-     * @param boolean $sync
-     * @return boolean
      */
-    public function sendFrame(Frame $frame, $sync = null)
+    public function sendFrame(Frame $frame, ?bool $sync = null) : bool
     {
         if (!$this->isConnecting && !$this->isConnected()) {
             $this->connect();
@@ -295,14 +247,10 @@ class Client
         }
     }
 
-
     /**
      * Write frame to server and expect an matching receipt frame
-     *
-     * @param Frame $stompFrame
-     * @return bool
      */
-    protected function sendFrameExpectingReceipt(Frame $stompFrame)
+    protected function sendFrameExpectingReceipt(Frame $stompFrame) : bool
     {
         $receipt = md5(microtime());
         $stompFrame['receipt'] = $receipt;
@@ -310,16 +258,13 @@ class Client
         return $this->waitForReceipt($receipt);
     }
 
-
     /**
-     * Wait for an receipt
+     * Wait for a receipt
      *
-     * @param string $receipt
-     * @return boolean
      * @throws UnexpectedResponseException If response has an invalid receipt.
      * @throws MissingReceiptException     If no receipt is received.
      */
-    protected function waitForReceipt($receipt)
+    protected function waitForReceipt(string $receipt) : bool
     {
         $stopAfter = $this->calculateReceiptWaitEnd();
         while (true) {
@@ -343,31 +288,24 @@ class Client
 
     /**
      * Returns the timestamp with micro time to stop wait for a receipt.
-     *
-     * @return float
      */
-    protected function calculateReceiptWaitEnd()
+    protected function calculateReceiptWaitEnd() : float
     {
         return microtime(true) + $this->receiptWait;
     }
 
-
     /**
-     * Read response frame from server
-     *
-     * @return Frame|false when no frame to read
+     * Read response frame from server.
      */
-    public function readFrame()
+    public function readFrame() : ?Frame
     {
         return array_shift($this->unprocessedFrames) ?: $this->connection->readFrame();
     }
 
     /**
      * Graceful disconnect from the server
-     * @param bool $sync
-     * @return void
      */
-    public function disconnect($sync = false)
+    public function disconnect(?bool $sync = false) : void
     {
         try {
             if ($this->connection && $this->connection->isConnected()) {
@@ -390,10 +328,8 @@ class Client
 
     /**
      * Current stomp session ID
-     *
-     * @return string|null
      */
-    public function getSessionId()
+    public function getSessionId() : ?string
     {
         return $this->sessionId;
     }
@@ -408,31 +344,25 @@ class Client
     }
 
     /**
-     * Check if client session has ben established
-     *
-     * @return boolean
+     * Check if client session has been established
      */
-    public function isConnected()
+    public function isConnected() : bool
     {
         return !empty($this->sessionId) && $this->connection->isConnected();
     }
 
     /**
      * Get the used connection.
-     *
-     * @return Connection
      */
-    public function getConnection()
+    public function getConnection() : Connection
     {
         return $this->connection;
     }
 
     /**
      * Get the currently used protocol.
-     *
-     * @return null|\Stomp\Protocol\Protocol
      */
-    public function getProtocol()
+    public function getProtocol() : ?Protocol
     {
         if (!$this->isConnecting && !$this->isConnected()) {
             $this->connect();
@@ -440,61 +370,45 @@ class Client
         return $this->protocol;
     }
 
-    /**
-     * @return string
-     */
-    public function getClientId()
+    public function getClientId() : string
     {
         return $this->clientId;
     }
 
-    /**
-     * @param string $clientId
-     * @return Client
-     */
-    public function setClientId($clientId)
+    public function setClientId(string $clientId) : static
     {
         $this->clientId = $clientId;
         return $this;
     }
 
-
     /**
      * Set seconds to wait for a receipt.
-     *
-     * @param float $seconds
      */
-    public function setReceiptWait($seconds)
+    public function setReceiptWait(float $seconds) : void
     {
         $this->receiptWait = $seconds;
     }
 
     /**
      * Check if client runs in synchronized mode, which is the default operation mode.
-     *
-     * @return boolean
      */
-    public function isSync()
+    public function isSync() : bool
     {
         return $this->sync;
     }
 
     /**
      * Toggle synchronized mode.
-     *
-     * @param boolean $sync
      */
-    public function setSync($sync)
+    public function setSync(bool $sync) : void
     {
         $this->sync = $sync;
     }
 
     /**
      * Check if all buffers are empty.
-     *
-     * @return bool
      */
-    public function isBufferEmpty()
+    public function isBufferEmpty() : bool
     {
         if (empty($this->unprocessedFrames) === false) {
             return false;
@@ -516,7 +430,7 @@ class Client
      *
      * @return Generator|Frame[]
      */
-    public function flushBufferedFrames()
+    public function flushBufferedFrames() : Generator
     {
         foreach ($this->unprocessedFrames as $unprocessedFrame) {
             yield $unprocessedFrame;

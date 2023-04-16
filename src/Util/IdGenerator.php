@@ -18,37 +18,33 @@ use RuntimeException;
  */
 class IdGenerator
 {
-    /**
-     * @var array
-     */
-    private static $generatedIds = [];
+    private static array $generatedIds = [];
 
     /**
      * Generate a not used id.
-     *
-     * @return int
      */
-    public static function generateId()
+    public static function generateId() : int
     {
+        if (count(self::$generatedIds) === PHP_INT_MAX) {
+            throw new RuntimeException('Message Id generation failed.');
+        }
+
         while ($rand = rand(1, PHP_INT_MAX)) {
-            if (!in_array($rand, static::$generatedIds, true)) {
-                static::$generatedIds[] = $rand;
+            if (!in_array($rand, self::$generatedIds, true)) {
+                self::$generatedIds[] = $rand;
                 return $rand;
             }
         }
-        throw new RuntimeException('Message Id generation failed.');
     }
 
     /**
      * Removes a previous generated id from currently used ids.
-     *
-     * @param int $generatedId
      */
-    public static function releaseId($generatedId)
+    public static function releaseId(int $generatedId) : void
     {
-        $index = array_search($generatedId, static::$generatedIds, true);
+        $index = array_search($generatedId, self::$generatedIds, true);
         if ($index !== false) {
-            unset(static::$generatedIds[$index]);
+            unset(self::$generatedIds[$index]);
         }
     }
 }

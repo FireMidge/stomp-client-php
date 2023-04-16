@@ -10,10 +10,7 @@ class DrainingTransactionConsumerState extends ConsumerState
 {
     use TransactionsTrait;
 
-    /**
-     * @inheritdoc
-     */
-    protected function init(array $options = [])
+    protected function init(array $options = []) : int|string|null
     {
         $this->initTransaction($options);
         return parent::init($options);
@@ -22,7 +19,7 @@ class DrainingTransactionConsumerState extends ConsumerState
     /**
      * @inheritdoc
      */
-    public function ack(Frame $frame)
+    public function ack(Frame $frame) : void
     {
         $this->getClient()->sendFrame($this->getProtocol()->getAckFrame($frame, $this->transactionId), false);
     }
@@ -30,7 +27,7 @@ class DrainingTransactionConsumerState extends ConsumerState
     /**
      * @inheritdoc
      */
-    public function nack(Frame $frame, $requeue = null)
+    public function nack(Frame $frame, ?bool $requeue = null) : void
     {
         $this->getClient()->sendFrame(
             $this->getProtocol()->getNackFrame($frame, $this->transactionId, $requeue),
@@ -41,7 +38,7 @@ class DrainingTransactionConsumerState extends ConsumerState
     /**
      * @inheritdoc
      */
-    public function read()
+    public function read() : ?Frame
     {
         if ($frame = $this->getClient()->readFrame()) {
             return $frame;
@@ -50,13 +47,13 @@ class DrainingTransactionConsumerState extends ConsumerState
             new ProducerTransactionState($this->getClient(), $this->getBase()),
             ['transactionId' => $this->transactionId]
         );
-        return false;
+        return null;
     }
 
     /**
      * @inheritdoc
      */
-    public function commit()
+    public function commit() : void
     {
         throw new DrainingMessageException($this->getClient(), $this, __FUNCTION__);
     }
@@ -64,7 +61,7 @@ class DrainingTransactionConsumerState extends ConsumerState
     /**
      * @inheritdoc
      */
-    public function abort()
+    public function abort() : void
     {
         throw new DrainingMessageException($this->getClient(), $this, __FUNCTION__);
     }

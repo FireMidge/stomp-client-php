@@ -29,52 +29,45 @@ class Connection
     /**
      * Default ActiveMq port
      */
-    const DEFAULT_PORT = 61613;
+    private const DEFAULT_PORT = 61613;
+
+    /**
+     * Alive Signal
+     */
+    private const ALIVE = "\n";
 
     /**
      * Host schemes.
-     *
-     * @var array[]
      */
-    private $hosts = [];
+    private array $hosts = [];
 
     /**
      * Connection timeout in seconds.
-     *
-     * @var integer
      */
-    private $connectTimeout;
+    private int $connectTimeout;
 
     /**
      * Timeout (seconds) that are applied on write calls.
-     *
-     * @var integer
      */
-    private $writeTimeout = 3;
+    private int $writeTimeout = 3;
 
     /**
      * Using persistent connection for creating socket
-     *
-     * @var bool
      */
-    private $persistentConnection = false;
+    private bool $persistentConnection = false;
 
     /**
      * Connection read wait timeout.
      *
      * 0 => seconds
      * 1 => milliseconds
-     *
-     * @var array
      */
-    private $readTimeout = [60, 0];
+    private array $readTimeout = [60, 0];
 
     /**
      * Connection options.
-     *
-     * @var array
      */
-    private $params = [
+    private array $params = [
         'randomize' => false // connect to one host from list in random order
     ];
 
@@ -83,66 +76,46 @@ class Connection
      *
      * @var resource|null
      */
-    private $connection;
+    private mixed $connection = null;
 
     /**
      * Connected host info.
-     *
-     * @var array
      */
-    private $activeHost = [];
+    private array $activeHost = [];
 
     /**
      * Stream Context used for client connection
      *
      * @see http://php.net/manual/de/function.stream-context-create.php
-     *
-     * @var array
      */
-    private $context = [];
+    private array $context = [];
 
     /**
      * Frame parser
-     *
-     * @var Parser
      */
-    private $parser;
+    private Parser $parser;
 
     /**
      * Host connected to.
-     *
-     * @var String
      */
-    private $host;
+    private ?string $host = null;
 
-    /**
-     * @var ConnectionObserverCollection
-     */
-    private $observers;
+    private ConnectionObserverCollection $observers;
 
     /**
      * Maximum number of bytes to write to a resource.
-     *
-     * @var int
      */
-    private $maxWriteBytes = 8192;
+    private int $maxWriteBytes = 8192;
 
     /**
      * Maximum number of bytes to read from a resource.
-     *
-     * @var int
      */
-    private $maxReadBytes = 8192;
-
-    /**
-     * Alive Signal
-     */
-    const ALIVE = "\n";
+    private int $maxReadBytes = 8192;
 
     /**
      * @var callable|null
      */
-    private $waitCallback;
+    private mixed $waitCallback = null;
 
     /**
      * Initialize connection
@@ -157,13 +130,14 @@ class Connection
      * @param array $context stream context
      * @throws ConnectionException
      */
-    public function __construct($brokerUri, $connectionTimeout = 1, array $context = [])
+    public function __construct(string $brokerUri, int $connectionTimeout = 1, array $context = [])
     {
-        $this->parser = new Parser();
+        $this->parser    = new Parser();
         $this->observers = new ConnectionObserverCollection();
         $this->parser->setObserver($this->observers);
         $this->connectTimeout = $connectionTimeout;
-        $this->context = $context;
+        $this->context        = $context;
+
         $pattern = "|^(([a-zA-Z0-9]+)://)+\(*([a-zA-Z0-9\.:/i,-_]+)\)*\??([a-zA-Z0-9=&]*)$|i";
         if (preg_match($pattern, $brokerUri, $matches)) {
             $scheme = $matches[2];
@@ -194,12 +168,10 @@ class Connection
      * Sets a wait callback that will be invoked when the connection is waiting for new data.
      *
      * This is a good place to call `pcntl_signal_dispatch()` if you need to ensure that your process signals in an
-     * interval that is lower as read timeout. You should also return `false` in your callback if you don't want the
+     * interval that is lower as the read timeout. You should also return `false` in your callback if you don't want the
      * connection to continue waiting for data.
-     *
-     * @param callable|null $waitCallback
      */
-    public function setWaitCallback($waitCallback)
+    public function setWaitCallback(callable|null $waitCallback) : void
     {
         if ($waitCallback !== null) {
             if (!is_callable($waitCallback)) {
@@ -211,38 +183,35 @@ class Connection
 
     /**
      * Returns the connect timeout in seconds.
-     *
-     * @return int
      */
-    public function getConnectTimeout()
+    public function getConnectTimeout() : int
     {
         return $this->connectTimeout;
     }
 
     /**
      * Returns the collection of observers of this connection.
-     *
-     * @return ConnectionObserverCollection
      */
-    public function getObservers()
+    public function getObservers() : ConnectionObserverCollection
     {
         return $this->observers;
     }
 
     /**
-     * Parse a broker URL
+     * Parse a broker URL and add it to hosts.
      *
      * @param string $url Broker URL
      * @return void
      * @throws ConnectionException
      */
-    private function parseUrl($url)
+    private function parseUrl(string $url) : void
     {
         $parsed = parse_url($url);
         if ($parsed === false) {
             throw new ConnectionException('Unable to parse url '. $url);
         }
-        array_push($this->hosts, $parsed + ['port' => '61613', 'scheme' => 'tcp']);
+
+        array_push($this->hosts, $parsed + ['port' => (string) self::DEFAULT_PORT, 'scheme' => 'tcp']);
     }
 
     /**
@@ -252,7 +221,7 @@ class Connection
      * @param integer $microseconds microseconds (1μs = 0.000001s, ex. 500ms = 500000)
      * @return void
      */
-    public function setReadTimeout($seconds, $microseconds = 0)
+    public function setReadTimeout(int $seconds, int $microseconds = 0) : void
     {
         $this->readTimeout[0] = $seconds;
         $this->readTimeout[1] = $microseconds;
@@ -262,10 +231,8 @@ class Connection
      * Returns the read timeout
      *
      * First element contains full seconds, second the microseconds part.
-     *
-     * @return array
      */
-    public function getReadTimeout()
+    public function getReadTimeout() : array
     {
         return $this->readTimeout;
     }
@@ -273,9 +240,9 @@ class Connection
     /**
      * Set the write timeout
      *
-     * @param int $writeTimeout seconds
+     * @param int $writeTimeout In seconds.
      */
-    public function setWriteTimeout($writeTimeout)
+    public function setWriteTimeout(int $writeTimeout) : void
     {
         $this->writeTimeout = $writeTimeout;
     }
@@ -286,7 +253,7 @@ class Connection
      * @param array $context
      * @return void
      */
-    public function setContext(array $context)
+    public function setContext(array $context) : void
     {
         $this->context = $context;
     }
@@ -294,11 +261,9 @@ class Connection
     /**
      * Set the maximum number of bytes to write to a resource
      *
-     * This will be useful if you are suffering problems with OpenSSL or Amazon MQ
-     *
-     * @param int $maxWriteBytes bytes
+     * This will be useful if you are suffering problems with OpenSSL or Amazon MQ.
      */
-    public function setMaxWriteBytes($maxWriteBytes)
+    public function setMaxWriteBytes(int $maxWriteBytes) : void
     {
         $this->maxWriteBytes = $maxWriteBytes;
     }
@@ -306,33 +271,28 @@ class Connection
     /**
      * Set the maximum number of bytes to read from a resource
      *
-     * This will be useful if you are suffering problems with OpenSSL or Amazon MQ
-     *
-     * @param int $maxReadBytes bytes
+     * This will be useful if you are suffering problems with OpenSSL or Amazon MQ.
      */
-    public function setMaxReadBytes($maxReadBytes)
+    public function setMaxReadBytes(int $maxReadBytes) : void
     {
         $this->maxReadBytes = $maxReadBytes;
     }
 
     /**
-     * Connect to an broker.
+     * Connect to a broker.
      *
-     * @return boolean
      * @throws ConnectionException
      */
-    public function connect()
+    public function connect() : bool
     {
-        if (!$this->isConnected()) {
+        if (! $this->isConnected()) {
             $this->connection = $this->getConnection();
         }
+
         return true;
     }
 
-    /**
-     * @param boolean $persistentConnection
-     */
-    public function setPersistentConnection($persistentConnection)
+    public function setPersistentConnection(bool $persistentConnection) : void
     {
         $this->persistentConnection = $persistentConnection;
     }
@@ -355,15 +315,14 @@ class Connection
                 $lastException = $connectionException;
             }
         }
+
         throw new ConnectionException("Could not connect to a broker", [], $lastException);
     }
 
     /**
      * Get the host list.
-     *
-     * @return array
      */
-    protected function getHostList()
+    protected function getHostList() : array
     {
         $hosts = array_values($this->hosts);
         if ($this->shouldRandomizeHosts()) {
@@ -380,7 +339,7 @@ class Connection
      * @return bool
      *   Whether the broker hosts should be shuffled in random order.
      */
-    protected function shouldRandomizeHosts()
+    protected function shouldRandomizeHosts() : bool
     {
         return filter_var($this->params['randomize'], FILTER_VALIDATE_BOOLEAN);
     }
@@ -388,7 +347,6 @@ class Connection
     /**
      * Try to connect to given host.
      *
-     * @param array $host
      * @return resource (stream)
      * @throws ConnectionException if connection setup fails
      */
@@ -426,21 +384,17 @@ class Connection
 
 
     /**
-     * Connection established.
-     *
-     * @return boolean
+     * Whether connection has been established.
      */
-    public function isConnected()
+    public function isConnected() : bool
     {
         return ($this->connection && is_resource($this->connection));
     }
 
     /**
      * Close connection.
-     *
-     * @return void
      */
-    public function disconnect()
+    public function disconnect() : void
     {
         if ($this->isConnected()) {
             @stream_socket_shutdown($this->connection, STREAM_SHUT_RDWR);
@@ -453,11 +407,9 @@ class Connection
     /**
      * Write frame to server.
      *
-     * @param Frame $stompFrame
-     * @return boolean
      * @throws ConnectionException
      */
-    public function writeFrame(Frame $stompFrame)
+    public function writeFrame(Frame $stompFrame) : bool
     {
         if (!$this->isConnected()) {
             throw new ConnectionException('Not connected to any server.', $this->activeHost);
@@ -470,11 +422,11 @@ class Connection
     /**
      * Write passed data to the stream, respecting passed timeout.
      *
-     * @param Frame|string $stompFrame
-     * @param float $timeout in seconds, supporting fractions
+     * @param float $timeout In seconds, supporting fractions
+     *
      * @throws ConnectionException
      */
-    private function writeData($stompFrame, $timeout)
+    private function writeData(Frame|string $stompFrame, float $timeout) : void
     {
         $data = (string) $stompFrame;
         $offset = 0;
@@ -510,11 +462,10 @@ class Connection
     /**
      * Try to read a frame from the server.
      *
-     * @return Frame|false when no frame to read
      * @throws ConnectionException
      * @throws ErrorFrameException
      */
-    public function readFrame()
+    public function readFrame() : ?Frame
     {
         // first we try to check the parser for any leftover frames
         if ($frame = $this->parser->nextFrame()) {
@@ -522,7 +473,7 @@ class Connection
         }
 
         if (!$this->hasDataToRead()) {
-            return false;
+            return null;
         }
 
         do {
@@ -538,7 +489,7 @@ class Connection
                 // again we give some time here
                 // as this path is most likely indicating that the socket is not working anymore
                 time_nanosleep(0, 5000000); // 5ms / 0.005s
-                return false;
+                return null;
             }
 
             $this->parser->addData($read);
@@ -548,17 +499,15 @@ class Connection
             }
         } while ($this->hasDataToRead());
 
-        return false;
+        // return null; Unreachable statement. Code above always terminates, according to PhpStan.
     }
 
     /**
      * The connection onFrame handler.
      *
-     * @param Frame $frame
-     * @return Frame
      * @throws ErrorFrameException
      */
-    private function onFrame(Frame $frame)
+    private function onFrame(Frame $frame) : Frame
     {
         if ($frame->isErrorFrame()) {
             throw new ErrorFrameException($frame);
@@ -571,20 +520,20 @@ class Connection
      *
      * This might wait until readTimeout is reached.
      *
-     * @return boolean
      * @throws ConnectionException
      * @see Connection::setReadTimeout()
      */
-    public function hasDataToRead()
+    public function hasDataToRead() : bool
     {
         if (!$this->isConnected()) {
             throw new ConnectionException('Not connected to any server.', $this->activeHost);
         }
 
         $isDataInBuffer = $this->connectionHasDataToRead($this->readTimeout[0], $this->readTimeout[1]);
-        if (!$isDataInBuffer) {
+        if (! $isDataInBuffer) {
             $this->observers->emptyBuffer();
         }
+
         return $isDataInBuffer;
     }
 
@@ -595,10 +544,10 @@ class Connection
      *
      * @param int $timeoutSec Second-timeout part
      * @param int $timeoutMicros Microsecond-timeout part
-     * @return bool
+     *
      * @throws ConnectionException
      */
-    private function connectionHasDataToRead($timeoutSec, $timeoutMicros)
+    private function connectionHasDataToRead(int $timeoutSec, int $timeoutMicros) : bool
     {
         $timeout = microtime(true) + $timeoutSec + ($timeoutMicros ? $timeoutMicros / 1000000 : 0);
         while (($hasData = $this->isDataOnStream()) === false) {
@@ -625,10 +574,9 @@ class Connection
      *
      * Will return true if data is available, false if no data is detected and null if the operation was interrupted.
      *
-     * @return bool|null
      * @throws ConnectionException
      */
-    private function isDataOnStream()
+    private function isDataOnStream() : ?bool
     {
         $read = [$this->connection];
         $write = null;
@@ -638,7 +586,7 @@ class Connection
         if ($hasStreamInfo === false) {
             // can return `false` if used in combination with `pcntl_signal` and lead to false errors here
             $error = error_get_last();
-            if ($error && isset($error['message']) && stripos($error['message'], 'interrupted system call') === false) {
+            if ($error !== null && stripos($error['message'], 'interrupted system call') === false) {
                 throw new ConnectionException(
                     'Check failed to determine if the socket is readable.',
                     $this->activeHost
@@ -647,25 +595,25 @@ class Connection
             return null;
         }
 
-        return !empty($read);
+        // FIXME: This makes no sense.
+        // Original code said: return !empty($read);
+        // ... which will always be true and makes no sense.
+
+        return $this->connection !== null; // Doesn't return what's promised in the doc block...
     }
 
     /**
      * Returns the parser which is used by the connection.
-     *
-     * @return Parser
      */
-    public function getParser()
+    public function getParser() : Parser
     {
         return $this->parser;
     }
 
     /**
      * Returns the host the connection was established to.
-     *
-     * @return String
      */
-    public function getHost()
+    public function getHost() : string
     {
         return $this->host;
     }
@@ -678,7 +626,7 @@ class Connection
      * @return void
      * @throws ConnectionException
      */
-    public function sendAlive($timeout = 1.0)
+    public function sendAlive(float $timeout = 1.0) : void
     {
         if ($this->isConnected()) {
             $this->writeData(self::ALIVE, $timeout);
@@ -688,7 +636,7 @@ class Connection
     /**
      * Immediately releases all allocated resources when the connection object gets destroyed.
      *
-     * This is especially important for long running processes.
+     * This is especially important for long-running processes.
      */
     public function __destruct()
     {

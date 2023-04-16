@@ -217,12 +217,18 @@ class Parser
         if ($this->buffer === '') {
             return false;
         }
+
         $this->frame = null;
         $this->offset = 0;
         $this->bufferSize = strlen($this->buffer);
+
+        // PhpStan is saying "Comparison operation "<" between 0 and int<1, max> is always true.",
+        // which doesn't apply in this case, as $this->offset can change inside the while() loop
+        // and become bigger than $this->bufferSize.
+        // @phpstan-ignore-next-line
         while ($this->offset < $this->bufferSize) {
             if ($this->mode === self::MODE_HEADER) {
-                $this->skipEmptyLines();
+                $this->skipEmptyLines(); // May change $this->offset
                 if ($this->detectFrameHead()) {
                     $this->mode = self::MODE_BODY;
                 } else {

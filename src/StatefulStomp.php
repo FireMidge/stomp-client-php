@@ -26,24 +26,9 @@ use Stomp\Transport\Message;
  */
 class StatefulStomp extends StateSetter implements IStateful
 {
+    private IStateful $state;
+    private Client $client;
 
-    /**
-     * active state
-     *
-     * @var IStateful
-     */
-    private $state;
-
-    /**
-     * @var Client
-     */
-    private $client;
-
-    /**
-     * StatefulStomp constructor.
-     *
-     * @param Client $client
-     */
     public function __construct(Client $client)
     {
         $this->client = $client;
@@ -52,11 +37,8 @@ class StatefulStomp extends StateSetter implements IStateful
 
     /**
      * Acknowledge consumption of a message from a subscription
-     *
-     * @param Frame $frame
-     * @return void
      */
-    public function ack(Frame $frame)
+    public function ack(Frame $frame) : void
     {
         $this->state->ack($frame);
     }
@@ -64,11 +46,9 @@ class StatefulStomp extends StateSetter implements IStateful
     /**
      * Not acknowledge consumption of a message from a subscription
      *
-     * @param Frame $frame
      * @param bool $requeue requeue header not supported in all brokers
-     * @return void
      */
-    public function nack(Frame $frame, $requeue = null)
+    public function nack(Frame $frame, ?bool $requeue = null) : void
     {
         $this->state->nack($frame, $requeue);
     }
@@ -76,41 +56,33 @@ class StatefulStomp extends StateSetter implements IStateful
     /**
      * Send a message.
      *
-     * @param string $destination
-     * @param \Stomp\Transport\Message $message
      * @return bool
      */
-    public function send($destination, Message $message)
+    public function send(string $destination, Message $message) : bool
     {
         return $this->state->send($destination, $message);
     }
 
     /**
-     * Begins an transaction.
-     *
-     * @return void
+     * Begins a transaction.
      */
-    public function begin()
+    public function begin() : void
     {
         $this->state->begin();
     }
 
     /**
      * Commit current transaction.
-     *
-     * @return void
      */
-    public function commit()
+    public function commit() : void
     {
         $this->state->commit();
     }
 
     /**
      * Abort current transaction.
-     *
-     * @return void
      */
-    public function abort()
+    public function abort() : void
     {
         $this->state->abort();
     }
@@ -119,35 +91,28 @@ class StatefulStomp extends StateSetter implements IStateful
      * Subscribe to given destination.
      *
      * Returns the subscriptionId used for this.
-     *
-     * @param string $destination
-     * @param string $selector
-     * @param string $ack
-     * @param array $header
-     * @return int
      */
-    public function subscribe($destination, $selector = null, $ack = 'auto', array $header = [])
-    {
+    public function subscribe(
+        string $destination,
+        ?string $selector = null,
+        string $ack = 'auto',
+        array $header = []
+    ) : int|string|null {
         return $this->state->subscribe($destination, $selector, $ack, $header);
     }
 
     /**
      * Unsubscribe from current or given destination.
-     *
-     * @param int $subscriptionId
-     * @return void
      */
-    public function unsubscribe($subscriptionId = null)
+    public function unsubscribe(string|int|null $subscriptionId = null) : void
     {
         $this->state->unsubscribe($subscriptionId);
     }
 
     /**
      * Returns as list of all active subscriptions.
-     *
-     * @return SubscriptionList
      */
-    public function getSubscriptions()
+    public function getSubscriptions() : SubscriptionList
     {
         return $this->state->getSubscriptions();
     }
@@ -155,20 +120,16 @@ class StatefulStomp extends StateSetter implements IStateful
 
     /**
      * Read a frame
-     *
-     * @return \Stomp\Transport\Frame|false
      */
-    public function read()
+    public function read() : ?Frame
     {
         return $this->state->read();
     }
 
     /**
      * Current State
-     *
-     * @return IStateful
      */
-    public function getState()
+    public function getState() : IStateful
     {
         return $this->state;
     }
@@ -177,19 +138,17 @@ class StatefulStomp extends StateSetter implements IStateful
      * Changes the current state.
      *
      * @param IStateful $state
-     * @return mixed
      */
-    protected function setState(IStateful $state)
+    protected function setState(IStateful $state) : int|string|null
     {
         $this->state = $state;
+        return null;
     }
 
     /**
      * Returns the used client.
-     *
-     * @return Client
      */
-    public function getClient()
+    public function getClient() : Client
     {
         return $this->client;
     }

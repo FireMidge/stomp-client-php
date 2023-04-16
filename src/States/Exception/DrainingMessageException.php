@@ -19,8 +19,7 @@ use Stomp\States\IStateful;
  */
 class DrainingMessageException extends InvalidStateException
 {
-    /** @var Client */
-    private $client;
+    private Client $client;
 
     public function __construct(Client $client, IStateful $state, $method)
     {
@@ -32,10 +31,7 @@ class DrainingMessageException extends InvalidStateException
         );
     }
 
-    /**
-     * @return Client
-     */
-    public function getClient()
+    public function getClient() : Client
     {
         return $this->client;
     }

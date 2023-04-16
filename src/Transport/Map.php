@@ -16,7 +16,7 @@ namespace Stomp\Transport;
  */
 class Map extends Message
 {
-    public $map;
+    public mixed $map;
 
     /**
      * Constructor
@@ -25,17 +25,17 @@ class Map extends Message
      * @param array $headers
      * @param string $command
      */
-    public function __construct($body, array $headers = [], $command = 'SEND')
+    public function __construct(array|object|string $body, array $headers = [], string $command = 'SEND')
     {
         if (is_string($body)) {
             parent::__construct($body, $headers);
-            $this->command = $command;
             $this->map = json_decode($body, true);
         } else {
             parent::__construct(json_encode($body), $headers + ['transformation' => 'jms-map-json']);
-            $this->command = $command;
             $this->map = $body;
         }
+
+        $this->command = $command;
     }
 
     /**
@@ -43,7 +43,7 @@ class Map extends Message
      *
      * @return mixed
      */
-    public function getMap()
+    public function getMap() : mixed
     {
         return $this->map;
     }

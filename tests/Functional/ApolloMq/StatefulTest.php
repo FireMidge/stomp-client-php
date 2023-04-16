@@ -9,6 +9,7 @@
 namespace Stomp\Tests\Functional\ApolloMq;
 
 use LogicException;
+use Stomp\Client;
 use Stomp\Tests\Functional\Stomp\StatefulTestBase;
 use Stomp\Transport\Message;
 
@@ -20,7 +21,7 @@ use Stomp\Transport\Message;
  */
 class StatefulTest extends StatefulTestBase
 {
-    protected function getClient()
+    protected function getClient() : Client
     {
         return ClientProvider::getClient();
     }

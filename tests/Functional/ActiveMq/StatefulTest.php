@@ -9,6 +9,7 @@
 namespace Stomp\Tests\Functional\ActiveMq;
 
 use LogicException;
+use Stomp\Client;
 use Stomp\Tests\Functional\Stomp\StatefulTestBase;
 use Stomp\Transport\Frame;
 use Stomp\Transport\Message;
@@ -21,7 +22,7 @@ use Stomp\Transport\Message;
  */
 class StatefulTest extends StatefulTestBase
 {
-    protected function getClient()
+    protected function getClient() : Client
     {
         return ClientProvider::getClient();
     }

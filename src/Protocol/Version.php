@@ -37,16 +37,10 @@ class Version
      */
     const VERSION_1_2 = '1.2';
 
-    /**
-     * @var Frame
-     */
-    private $frame;
+    private Frame $frame;
 
 
     /**
-     * Version constructor.
-     *
-     * @param Frame $frame
      * @throws StompException
      */
     public function __construct(Frame $frame)
@@ -63,14 +57,14 @@ class Version
     /**
      * Returns the protocol to use.
      *
-     * @param string $clientId
      * @param string $default server to use of no server detected
      * @return ActiveMq|Apollo|Protocol|RabbitMq
      */
-    public function getProtocol($clientId, $default = 'ActiveMQ/5.11.1')
+    public function getProtocol(string $clientId, string $default = 'ActiveMQ/5.11.1') : Protocol
     {
         $server = trim((string) $this->frame['server']) ?: $default;
         $version = $this->getVersion();
+
         if (stristr($server, 'rabbitmq') !== false) {
             return new RabbitMq($clientId, $version, $server);
         }
@@ -83,15 +77,14 @@ class Version
         if (stristr($server, 'open message queue') !== false) {
             return new OpenMq($clientId, $version, $server);
         }
+
         return new Protocol($clientId, $version, $server);
     }
 
     /**
      * Detected version
-     *
-     * @return string
      */
-    public function getVersion()
+    public function getVersion() : string
     {
         return $this->frame['version'] ?: self::VERSION_1_0;
     }
@@ -100,9 +93,8 @@ class Version
      * Check if version is same or newer than given one.
      *
      * @param string $version to check against
-     * @return boolean
      */
-    public function hasVersion($version)
+    public function hasVersion(string $version) : bool
     {
         return version_compare($this->getVersion(), $version, '>=');
     }
