@@ -1,8 +1,8 @@
 {
-    "name": "stomp-php/stomp-php",
-    "description": "stomp support for PHP",
+    "name": "firemidge/stomp-client-php",
+    "description": "STOMP support for PHP. This is a forked project, to add support for PHP 8.1 onwards, and to drop older PHP versions, in order to have full type-hinting and return types.",
     "keywords": ["messaging", "stomp", "jms", "activemq", "rabbitmq", "apollomq"],
-    "homepage": "http://github.com/stomp-php/stomp-php",
+    "homepage": "http://github.com/firemidge/stomp-php",
     "license": "Apache-2.0",
     "authors": [
         {
@@ -19,8 +19,12 @@
             "name": "Jens Radtke",
             "email": "swefl@fin-sn.de",
             "homepage": "http://www.fin-sn.de"
-        }
-    ],
+        },
+		{
+		  "name": "Jay Atkins",
+		  "email": "jay001000@gmail.com"
+		}
+	],
     "config": {
         "sort-packages": true
     },
