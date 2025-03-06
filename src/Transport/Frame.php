@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 /*
  * This file is part of the Stomp package.
@@ -58,7 +59,7 @@ class Frame implements ArrayAccess
      *
      * Will override existing keys.
      *
-     * @param array $header
+     * @param array $header Associative array, with the key being the header name.
      */
     public function addHeaders(array $header) : static
     {
@@ -149,13 +150,18 @@ class Frame implements ArrayAccess
     }
 
     /**
-     * Encodes header values.
+     * Encodes header values and names.
      */
-    protected function encodeHeaderValue(string $value) : string
+    protected function encodeHeaderValue(string|int $value) : string
     {
+        if (! is_string($value)) {
+            return (string) $value;
+        }
+
         if ($this->legacyMode) {
             return str_replace(["\n"], ['\n'], $value);
         }
+
         return str_replace(["\\", "\r", "\n", ':'], ["\\\\", '\r', '\n', '\c'], $value);
     }
 
@@ -164,7 +170,7 @@ class Frame implements ArrayAccess
         return isset($this->headers[$offset]);
     }
 
-    public function offsetGet($offset) : mixed
+    public function offsetGet(mixed $offset) : mixed
     {
         if (isset($this->headers[$offset])) {
             return $this->headers[$offset];
@@ -180,7 +186,7 @@ class Frame implements ArrayAccess
         }
     }
 
-    public function offsetUnset($offset) : void
+    public function offsetUnset(mixed $offset) : void
     {
         unset($this->headers[$offset]);
     }

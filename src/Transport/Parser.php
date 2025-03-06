@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 /*
  * This file is part of the Stomp package.
@@ -121,12 +122,7 @@ class Parser
      */
     private $observer;
 
-    /**
-     * Parser constructor.
-     *
-     * @param FrameFactory $factory
-     */
-    public function __construct(FrameFactory $factory = null)
+    public function __construct(?FrameFactory $factory = null)
     {
         $this->factory = $factory ?: new FrameFactory();
     }
@@ -135,9 +131,8 @@ class Parser
      * Sets the observer for the parser, in order to receive heartbeat information.
      *
      * @param ConnectionObserver $observer
-     * @return Parser
      */
-    public function setObserver(ConnectionObserver $observer)
+    public function setObserver(ConnectionObserver $observer) : static
     {
         $this->observer = $observer;
         return $this;
@@ -146,31 +141,24 @@ class Parser
 
     /**
      * Returns the factory that will be used to create frame instances.
-     *
-     * @return FrameFactory
      */
-    public function getFactory()
+    public function getFactory() : FrameFactory
     {
         return $this->factory;
     }
 
     /**
      * Set parser in legacy mode.
-     *
-     * @param bool|false $legacy
      */
-    public function legacyMode($legacy = false)
+    public function legacyMode(bool $legacy = false) : void
     {
         $this->legacyMode = $legacy;
     }
 
     /**
      * Add data to parse.
-     *
-     * @param string $data
-     * @return void
      */
-    public function addData($data)
+    public function addData(string $data) : void
     {
         $this->buffer .= $data;
     }
@@ -179,19 +167,16 @@ class Parser
      * Get next parsed frame.
      *
      * @deprecated Will be removed in next version. Please use nextFrame().
-     * @return Frame
      */
-    public function getFrame()
+    public function getFrame() : Frame
     {
         return $this->frame;
     }
 
     /**
      * Parse current buffer and return the next available frame, otherwise return null.
-     *
-     * @return null|Frame
      */
-    public function nextFrame()
+    public function nextFrame() : ?Frame
     {
         if ($this->parse()) {
             $frame = $this->getFrame();
@@ -209,10 +194,8 @@ class Parser
      * Parse current buffer for frames.
      *
      * @deprecated Will become private in next version. Please use nextFrame().
-     *
-     * @return bool
      */
-    public function parse()
+    public function parse() : bool
     {
         if ($this->buffer === '') {
             return false;
@@ -252,7 +235,7 @@ class Parser
     /**
      * Skips empty lines before frame headers (they are allowed after \00)
      */
-    private function skipEmptyLines()
+    private function skipEmptyLines() : void
     {
         $foundHeartbeat = false;
         while ($this->offset < $this->bufferSize) {
@@ -271,10 +254,8 @@ class Parser
 
     /**
      * Detect frame header end marker, starting from current offset.
-     *
-     * @return bool
      */
-    private function detectFrameHead()
+    private function detectFrameHead() : bool
     {
         $firstCrLf = strpos($this->buffer, self::HEADER_STOP_CR_LF, $this->offset);
         $firstLf = strpos($this->buffer, self::HEADER_STOP_LF, $this->offset);
@@ -296,10 +277,8 @@ class Parser
 
     /**
      * Detect frame end marker, starting from current offset.
-     *
-     * @return bool
      */
-    private function detectFrameEnd()
+    private function detectFrameEnd() : bool
     {
         $bodySize = null;
         if ($this->expectedBodyLength) {
@@ -320,10 +299,8 @@ class Parser
 
     /**
      * Adds a frame from current known command, headers. Uses current offset and given body size.
-     *
-     * @param integer $bodySize
      */
-    private function setFrame($bodySize)
+    private function setFrame(int $bodySize) : void
     {
         $this->frame = $this->factory->createFrame(
             $this->command,
@@ -340,11 +317,8 @@ class Parser
 
     /**
      * Extracts command and headers from given header source.
-     *
-     * @param string $source
-     * @return void
      */
-    private function extractFrameMeta($source)
+    private function extractFrameMeta(string $source) : void
     {
         $headers = preg_split("/(\r?\n)+/", $source);
 
@@ -366,11 +340,8 @@ class Parser
 
     /**
      * Decodes header values.
-     *
-     * @param string $value
-     * @return string
      */
-    private function decodeHeaderValue($value)
+    private function decodeHeaderValue(string $value) : string
     {
         if ($this->legacyMode) {
             return str_replace(['\n'], ["\n"], $value);
@@ -380,10 +351,8 @@ class Parser
 
     /**
      * Resets the current buffer within this parser and returns the flushed buffer value.
-     *
-     * @return string
      */
-    public function flushBuffer()
+    public function flushBuffer() : string
     {
         $this->expectedBodyLength = null;
         $this->headers = [];
@@ -398,10 +367,8 @@ class Parser
 
     /**
      * Checks if there is nothing left to parse.
-     *
-     * @return bool
      */
-    public function isBufferEmpty()
+    public function isBufferEmpty() : bool
     {
         return $this->bufferSize === 0 || $this->offset === $this->bufferSize;
     }

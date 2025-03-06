@@ -20,7 +20,7 @@ class Subscription
 {
     private int|string $subscriptionId;
 
-    private string $selector;
+    private ?string $selector;
 
     private string $destination;
 
@@ -33,7 +33,7 @@ class Subscription
      */
     public function __construct(
         string $destination,
-        string $selector,
+        ?string $selector,
         string $ack,
         int|string $subscriptionId,
         array $header = []
@@ -50,7 +50,7 @@ class Subscription
         return $this->subscriptionId;
     }
 
-    public function getSelector() : string
+    public function getSelector() : ?string
     {
         return $this->selector;
     }

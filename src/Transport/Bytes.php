@@ -16,13 +16,7 @@ namespace Stomp\Transport;
  */
 class Bytes extends Message
 {
-    /**
-     * Constructor
-     *
-     * @param string $body
-     * @param array $headers
-     */
-    public function __construct($body, array $headers = [])
+    public function __construct(?string $body, array $headers = [])
     {
         parent::__construct($body, $headers);
         $this->headers['content-type'] = 'application/octet-stream';

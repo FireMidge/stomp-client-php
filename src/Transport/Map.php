@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 /*
  * This file is part of the Stomp package.
@@ -40,8 +41,6 @@ class Map extends Message
 
     /**
      * Returns the received decoded json.
-     *
-     * @return mixed
      */
     public function getMap() : mixed
     {

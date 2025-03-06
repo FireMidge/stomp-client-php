@@ -64,9 +64,9 @@ class Client
      */
     private float $receiptWait = 2;
 
-    private string $login;
+    private string $login = '';
 
-    private string $passcode;
+    private string $passcode = '';
 
     private array $versions = [Version::VERSION_1_0, Version::VERSION_1_1, Version::VERSION_1_2];
 

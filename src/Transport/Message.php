@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 /*
  * This file is part of the Stomp package.
@@ -16,9 +17,6 @@ namespace Stomp\Transport;
  */
 class Message extends Frame
 {
-    /**
-     * Message constructor.
-     */
     public function __construct(?string $body, array $headers = [])
     {
         parent::__construct('SEND', $headers, $body);
